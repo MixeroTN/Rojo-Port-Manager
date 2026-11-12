@@ -1,0 +1,291 @@
+{
+  "name": "rojo-port-manager",
+  "displayName": "Rojo Port Manager",
+  "description": "See, start and stop the Rojo servers of your projects, each on its own port that stays the same.",
+  "version": "0.1.0",
+  "publisher": "shiro",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.93.0",
+    "node": ">=22.18.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "roblox",
+    "rojo",
+    "luau",
+    "port",
+    "server"
+  ],
+  "icon": "media/icon.png",
+  "main": "./dist/extension.js",
+  "extensionKind": [
+    "workspace"
+  ],
+  "activationEvents": [
+    "workspaceContains:*.project.json"
+  ],
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "description": "Starting a server runs the Rojo that the project pins (rokit.toml, aftman.toml), so it works only in a trusted workspace. The list of running servers works everywhere.",
+      "restrictedConfigurations": [
+        "rojoPorts.rojoPath"
+      ]
+    },
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "Rojo Port Manager needs local files and processes."
+    }
+  },
+  "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "rojoPorts.servers",
+          "name": "Rojo",
+          "when": "rojoPorts.active",
+          "icon": "media/view.svg",
+          "contextualTitle": "Rojo"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "rojoPorts.refresh",
+        "title": "Refresh",
+        "category": "Rojo Ports",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "rojoPorts.start",
+        "title": "Start Server",
+        "category": "Rojo Ports",
+        "icon": "$(play)"
+      },
+      {
+        "command": "rojoPorts.stop",
+        "title": "Stop Server",
+        "category": "Rojo Ports",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "rojoPorts.restart",
+        "title": "Restart Server",
+        "category": "Rojo Ports",
+        "icon": "$(debug-restart)"
+      },
+      {
+        "command": "rojoPorts.copyPort",
+        "title": "Copy Port",
+        "category": "Rojo Ports",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "rojoPorts.changePort",
+        "title": "Change Port…",
+        "category": "Rojo Ports",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "rojoPorts.showLog",
+        "title": "Show Server Log",
+        "category": "Rojo Ports",
+        "icon": "$(output)"
+      },
+      {
+        "command": "rojoPorts.openProjectFile",
+        "title": "Open Project File",
+        "category": "Rojo Ports",
+        "icon": "$(go-to-file)"
+      },
+      {
+        "command": "rojoPorts.pick",
+        "title": "Start or Stop a Server…",
+        "category": "Rojo Ports",
+        "icon": "$(radio-tower)"
+      },
+      {
+        "command": "rojoPorts.showOutput",
+        "title": "Show Extension Output",
+        "category": "Rojo Ports",
+        "icon": "$(output)"
+      },
+      {
+        "command": "rojoPorts.openSettings",
+        "title": "Open Settings",
+        "category": "Rojo Ports",
+        "icon": "$(settings-gear)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "rojoPorts.refresh",
+          "when": "view == rojoPorts.servers",
+          "group": "navigation@1"
+        },
+        {
+          "command": "rojoPorts.showOutput",
+          "when": "view == rojoPorts.servers",
+          "group": "9_extension@1"
+        },
+        {
+          "command": "rojoPorts.openSettings",
+          "when": "view == rojoPorts.servers",
+          "group": "9_extension@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "rojoPorts.start",
+          "when": "view == rojoPorts.servers && viewItem =~ /^rojo:project\\b.*\\+start\\b/",
+          "group": "inline@1"
+        },
+        {
+          "command": "rojoPorts.stop",
+          "when": "view == rojoPorts.servers && viewItem =~ /\\+stop\\b/",
+          "group": "inline@1"
+        },
+        {
+          "command": "rojoPorts.copyPort",
+          "when": "view == rojoPorts.servers && viewItem =~ /\\+port\\b/",
+          "group": "inline@2"
+        },
+        {
+          "command": "rojoPorts.start",
+          "when": "view == rojoPorts.servers && viewItem =~ /^rojo:project\\b.*\\+start\\b/",
+          "group": "1_server@1"
+        },
+        {
+          "command": "rojoPorts.stop",
+          "when": "view == rojoPorts.servers && viewItem =~ /\\+stop\\b/",
+          "group": "1_server@2"
+        },
+        {
+          "command": "rojoPorts.restart",
+          "when": "view == rojoPorts.servers && viewItem =~ /^rojo:project\\b.*\\+restart\\b/",
+          "group": "1_server@3"
+        },
+        {
+          "command": "rojoPorts.copyPort",
+          "when": "view == rojoPorts.servers && viewItem =~ /\\+port\\b/",
+          "group": "2_port@1"
+        },
+        {
+          "command": "rojoPorts.changePort",
+          "when": "view == rojoPorts.servers && viewItem =~ /^rojo:project\\b/",
+          "group": "2_port@2"
+        },
+        {
+          "command": "rojoPorts.showLog",
+          "when": "view == rojoPorts.servers && viewItem =~ /\\+log\\b/",
+          "group": "3_files@1"
+        },
+        {
+          "command": "rojoPorts.openProjectFile",
+          "when": "view == rojoPorts.servers && viewItem =~ /^rojo:project\\b/",
+          "group": "3_files@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "rojoPorts.refresh",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.start",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.stop",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.restart",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.copyPort",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.changePort",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.showLog",
+          "when": "false"
+        },
+        {
+          "command": "rojoPorts.openProjectFile",
+          "when": "false"
+        },
+        {
+          "command": "rojoPorts.pick",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.showOutput",
+          "when": "rojoPorts.active"
+        },
+        {
+          "command": "rojoPorts.openSettings",
+          "when": "rojoPorts.active"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Rojo Port Manager",
+      "properties": {
+        "rojoPorts.portRange": {
+          "type": "string",
+          "default": "34872-34899",
+          "pattern": "^\\s*\\d{1,5}\\s*(-\\s*\\d{1,5}\\s*)?$",
+          "scope": "application",
+          "markdownDescription": "Ports to look for Rojo servers on and to give new projects, as `first-last` (at most 256 ports). A new project gets the first free port after 34872, which stays free for a plain `rojo serve`. Ports saved for a project or set by its `servePort` are checked too, also outside the range."
+        },
+        "rojoPorts.rojoPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "markdownDescription": "Path to one `rojo` executable for every project. Empty: the version each project pins in `rokit.toml`, `aftman.toml` or `foreman.toml` (or in the global manifest of Rokit or Aftman), from the storage of Rokit or Aftman; without a pinned version, `rojo` on `PATH`. Name a real Rojo executable, not a tool manager shim: started in the background, a shim opens a console window for Rojo."
+        },
+        "rojoPorts.statusBar.enabled": {
+          "type": "boolean",
+          "default": true,
+          "markdownDescription": "Show the Rojo servers of this window in the status bar."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "vscode:prepublish": "node esbuild.mjs --production",
+    "typecheck": "tsc -p .",
+    "lint": "eslint src test scripts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test:unit": "node --test \"test/unit/*.test.ts\"",
+    "test:smoke": "node test/integration/run.mjs",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:unit",
+    "package": "node scripts/package.mjs",
+    "icon": "node scripts/make-icon.mjs"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "~20.19.43",
+    "@types/vscode": "~1.93.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.1.0",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.14.0",
+    "prettier": "^3.10.0",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.2"
+  }
+}
