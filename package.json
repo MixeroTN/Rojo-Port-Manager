@@ -3,9 +3,17 @@
   "displayName": "Rojo Port Manager",
   "description": "See, start and stop the Rojo servers of your projects, each on its own port that stays the same.",
   "version": "0.1.0",
-  "publisher": "shiro",
+  "publisher": "mixerotn",
   "private": true,
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MixeroTN/Rojo-Port-Manager.git"
+  },
+  "homepage": "https://github.com/MixeroTN/Rojo-Port-Manager#readme",
+  "bugs": {
+    "url": "https://github.com/MixeroTN/Rojo-Port-Manager/issues"
+  },
   "engines": {
     "vscode": "^1.93.0",
     "node": ">=22.18.0"

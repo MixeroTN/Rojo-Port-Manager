@@ -64,7 +64,8 @@ place. This extension shows all of it in one place and gives every project its o
 
 ## Install
 
-Download `rojo-port-manager-<version>.vsix` from the GitHub release, then run
+Download `rojo-port-manager-<version>.vsix` from the
+[releases](https://github.com/MixeroTN/Rojo-Port-Manager/releases), then run
 `code --install-extension rojo-port-manager-<version>.vsix` or use **Extensions: Install from VSIX...** in VS Code.
 
 ## Development
