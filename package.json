@@ -34,7 +34,8 @@
     "workspace"
   ],
   "activationEvents": [
-    "workspaceContains:*.project.json"
+    "workspaceContains:default.project.json",
+    "onStartupFinished"
   ],
   "capabilities": {
     "untrustedWorkspaces": {

@@ -18,7 +18,6 @@ export interface CommandContext {
   resolveRojo: (folder: string) => RojoResolution;
   /** The command that installs the pinned tools (`rokit install`), when a tool manager is installed. */
   installCommand: () => string | undefined;
-  extensionId: string;
 }
 
 function errorText(error: unknown): string {
@@ -525,27 +524,38 @@ async function pick(context: CommandContext): Promise<void> {
   await picked?.run?.();
 }
 
-export function registerCommands(context: CommandContext): vscode.Disposable {
-  const { manager, log } = context;
+/**
+ * Registers the commands. `open` gives the panel of the window: a command that needs it starts it where it does not
+ * run yet (a window without a project file).
+ */
+export function registerCommands(
+  log: vscode.LogOutputChannel,
+  extensionId: string,
+  open: () => CommandContext,
+): vscode.Disposable {
+  const withPanel =
+    (run: (context: CommandContext, node?: ViewNode) => Promise<unknown>) =>
+    (node?: ViewNode): Promise<unknown> =>
+      run(open(), node);
 
   const handlers: Record<string, (node?: ViewNode) => Promise<unknown>> = {
-    refresh: async () => {
+    refresh: withPanel(async ({ manager }) => {
       manager.scanProjects();
       await manager.refresh();
-    },
-    start: async (node) => {
+    }),
+    start: withPanel(async (context, node) => {
       const status = await resolveProject(context, node);
       if (status) {
         await startProject(context, status);
       }
-    },
-    stop: async (node) => {
+    }),
+    stop: withPanel(async (context, node) => {
       const target = await resolvePort(context, node);
       if (target) {
         await stopPort(context, target.port, { confirm: true, expectedProject: target.project });
       }
-    },
-    restart: async (node) => {
+    }),
+    restart: withPanel(async (context, node) => {
       const status = await resolveProject(context, node);
 
       if (!status) {
@@ -559,25 +569,26 @@ export function registerCommands(context: CommandContext): vscode.Disposable {
       }
 
       if (await stopPort(context, status.port, { confirm: true, expectedProject: status.project.path })) {
-        const fresh = manager.project(status.project.path);
+        const fresh = context.manager.project(status.project.path);
         if (fresh) {
           await startProject(context, fresh);
         }
       }
-    },
-    copyPort: async (node) => {
+    }),
+    copyPort: withPanel(async (context, node) => {
       const target = await resolvePort(context, node);
       if (target) {
         await copyPort(target.port);
       }
-    },
-    changePort: async (node) => {
+    }),
+    changePort: withPanel(async (context, node) => {
       const status = await resolveProject(context, node);
       if (status) {
         await changePortFor(context, status);
       }
-    },
-    showLog: async (node) => {
+    }),
+    showLog: withPanel(async (context, node) => {
+      const { manager } = context;
       const target = await resolvePort(context, node);
       const record = target === undefined ? undefined : manager.store.read().servers[String(target.port)];
       const status = node?.data.type === 'project' ? manager.project(node.data.path) : undefined;
@@ -588,21 +599,21 @@ export function registerCommands(context: CommandContext): vscode.Disposable {
       } else if (target !== undefined) {
         void vscode.window.showInformationMessage('There is no log for this server: the panel did not start it.');
       }
-    },
-    openProjectFile: async (node) => {
+    }),
+    openProjectFile: withPanel(async (context, node) => {
       const status = await resolveProject(context, node);
       if (status) {
         await vscode.window.showTextDocument(vscode.Uri.file(status.project.path));
       }
-    },
-    pick: () => pick(context),
+    }),
+    pick: withPanel((context) => pick(context)),
     showOutput: () => {
       log.show();
 
       return Promise.resolve();
     },
     openSettings: async () => {
-      await vscode.commands.executeCommand('workbench.action.openSettings', `@ext:${context.extensionId}`);
+      await vscode.commands.executeCommand('workbench.action.openSettings', `@ext:${extensionId}`);
     },
   };
 

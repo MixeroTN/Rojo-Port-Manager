@@ -13,7 +13,12 @@ is open source under the MIT license.
   manager shim (a shim started without a console makes Rojo open a console window). Never end a process that is not
   proven to be the server: Stop ends only a listener of the port that is named `rojo`, right after the port answered
   as a Rojo server; a recorded process id is ended only while its start is still going on.
+- The extension starts in every window (`onStartupFinished`; at once for `workspaceContains:default.project.json`).
+  Until a project file is found at a root or a command runs, it only watches the roots: keep that path cheap. The
+  panel (`createPanel` in `src/extension.ts`) probes the ports. Never match project files with a `workspaceContains`
+  pattern: VS Code's search for one gives up after 7 seconds on a busy machine, and the extension then never starts.
 - Run programs without a shell (`execFile`, `spawn` with an argument list) and Windows' own tools by full path.
 - Test data is neutral: no real game names, place ids or paths of a user's machine.
 - Before finishing: `npm run check` (type check, lint, format check, unit tests) and `npm run build`. Run
-  `npm run test:smoke -- <folder with a project file>` when starting, stopping, the view or the commands changed.
+  `npm run test:smoke -- <folder with a project file>` when starting, stopping, the view or the commands changed, and
+  `npm run test:smoke -- --activation` when the activation or the search for project files changed.

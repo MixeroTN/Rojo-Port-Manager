@@ -10,7 +10,8 @@ place. This extension shows all of it in one place and gives every project its o
 ## Features
 
 - **A Rojo view in the Explorer** with every `*.project.json` at the root of your workspace folders, its port and its
-  state: running, stopped, or the port taken by another server or program.
+  state: running, stopped, or the port taken by another server or program. It shows in every window with such a file,
+  also when the file is added later.
 - **Start, Stop and Restart** from the view, the status bar or the Command Palette. The servers run in the background,
   without a console window and detached from VS Code: reloading or closing the window does not stop them, and every
   VS Code window sees them.
@@ -31,6 +32,13 @@ place. This extension shows all of it in one place and gives every project its o
 
 ## How it works
 
+- **Finding projects.** VS Code starts the extension at once in a window whose folder has a `default.project.json`
+  (an exact file name is a plain check). In every other window it starts once VS Code is ready, and looks at the roots
+  of the workspace folders itself for a `*.project.json`: VS Code's own search for such a pattern gives up after 7
+  seconds on a busy machine, for example while many windows open at once. A folder that cannot be read gets up to 10
+  tries in all; a read without an answer within 5 seconds is not started again, the next try waits for it. Until a
+  project file is found or a Rojo Ports command runs, nothing is probed and the view stays hidden; a project file
+  added later shows it without a reload. The **Rojo Port Manager** output says which file was found, or why none was.
 - **Finding servers.** Every 4 seconds while the window has the focus, the extension asks
   `http://127.0.0.1:<port>/api/rojo` on the ports of `rojoPorts.portRange` and on every port a project saved or asks
   for with `servePort`. A Rojo server answers with its project name, version and session (Rojo 7.7 in MessagePack,
@@ -89,8 +97,11 @@ Press F5 in VS Code ("Run Extension") to debug the extension in a second window.
 - `test/fixtures/` holds the real answers of Rojo 7.7.1 (MessagePack), 7.5.1 and 7.2.1 (JSON) for a test project.
 - `npm run test:smoke -- <folder with a project file>` downloads VS Code Insiders into `.vscode-test/` the first time
   (`VSCODE_EXECUTABLE` names another build, `--installed` uses your VS Code), opens the folder with this extension and
-  its own user data, starts a Rojo server from the panel on a port from 34950-34960, copies the port and stops it. The
-  folder must be able to serve: it pins an installed Rojo version, or Rojo is on `PATH`.
+  its own user data, waits for VS Code to start the extension, starts a Rojo server from the panel on a port from
+  34950-34960, copies the port and stops it. The folder must be able to serve: it pins an installed Rojo version, or
+  Rojo is on `PATH`.
+- `npm run test:smoke -- --activation` needs no folder and no Rojo: it opens an empty folder, checks that the panel
+  waits without a project file, then adds one and checks that the panel starts for it.
 
 ## Release
 
