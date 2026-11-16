@@ -2,7 +2,7 @@
   "name": "rojo-port-manager",
   "displayName": "Rojo Port Manager",
   "description": "See, start and stop the Rojo servers of your projects, each on its own port that stays the same.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "mixerotn",
   "private": true,
   "license": "MIT",
